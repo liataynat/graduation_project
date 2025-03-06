@@ -22,12 +22,17 @@
 #include <set>
 #include <utility>
 
+#include "mersenne_rng.h"
+#include "init_setting.h"
+#include "init_argument.h"
+#include "init_signal.h"
 
 using namespace std;
 
 #define mypop(stack) stack[--stack ## _fill_pointer]
 #define mypush(item, stack) stack[stack ## _fill_pointer++] = item
 
+extern Mersenne_rng rng;
 
 //set(variable, soft clause) information
 extern long long *time_stamp;
