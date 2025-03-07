@@ -26,6 +26,16 @@
 #include "init_setting.h"
 #include "init_argument.h"
 #include "init_signal.h"
+#include "scoring_function.h"
+#include "solution_init.h"
+#include "set_states.h"
+#include "break_ties.h"
+#include "cc_and_tabu.h"
+#include "reconstruct.h"
+#include "subset_removal.h"
+#include "subset_addition.h"
+#include "update_variables.h"
+#include "preprocess.h"
 
 using namespace std;
 
@@ -90,5 +100,25 @@ extern int mu;
 extern double novel_addition_prob;
 
 extern struct tms start_time;
+
+double get_runtime();
+void start_timing();
+
+void allocate_memory();
+void free_memory();
+
+void check_cur_solution();
+void check_best_solution();
+
+bool check_cover();
+
+bool test_termination();
+bool solution_feasible();
+
+void update_best_to_cur();
+
+int select_set_from_zero_stack();
+
+void output();
 
 #endif

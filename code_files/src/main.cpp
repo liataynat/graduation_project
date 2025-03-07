@@ -6,6 +6,7 @@
 
 int main(int argc, char **argv){
     init_argument(argc,argv);
+    preprocessing();
     function_test();
     return 0;
 }

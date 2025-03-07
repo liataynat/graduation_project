@@ -191,6 +191,29 @@ bool parse_argument(int argc,char **argv){
         {NULL, NULL, NULL, 0, 0}
     };
 
+    for (int i = 1; i < argc; i++) {
+        bool found = false;
+        for (int j = 0; paramTable[j].name != NULL; j++) {
+            if (strcmp(argv[i], paramTable[j].name) == 0) {
+                if (i + 1 >= argc) {
+                    fprintf(stderr, "Error: Missing value for parameter '%s'\n", paramTable[j].name);
+                    return false;
+                }
+                if (!paramTable[j].handler(argv[i + 1], paramTable[j].field, paramTable[j].min, paramTable[j].max)) {
+                    fprintf(stderr, "Error: Invalid value for parameter '%s'\n", paramTable[j].name);
+                    return false;
+                }
+                i++; 
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            // 未知参数
+            fprintf(stderr, "Error: Unknown argument '%s'\n", argv[i]);
+            return false;
+        }
+    }
 
     //copy
 
