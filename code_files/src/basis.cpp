@@ -61,18 +61,17 @@ int *org_set_item_num;
 int mu;
 double novel_addition_prob;
 
-struct tms start_time;
+clock_t start_time;
 
 double get_runtime()
 {
-    struct tms stop;
-    times(&stop);
-    return (double)(stop.tms_utime - start_time.tms_utime + stop.tms_stime - start_time.tms_stime) / sysconf(_SC_CLK_TCK);
+    clock_t stop_time = clock();  // 获取当前的时钟滴答数
+    return (double)(stop_time - start_time) / CLOCKS_PER_SEC;  // 转换为秒
 }
 
 void start_timing()
 {
-    times(&start_time);
+    start_time = clock();
 }
 
 void allocate_memory()

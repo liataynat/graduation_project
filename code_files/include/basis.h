@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <set>
 #include <utility>
+#include <cstddef>
 
 #include "mersenne_rng.h"
 #include "init_setting.h"
@@ -36,6 +37,7 @@
 #include "subset_addition.h"
 #include "update_variables.h"
 #include "preprocess.h"
+#include "init.h"
 
 using namespace std;
 
@@ -99,7 +101,7 @@ extern int *org_set_item_num;
 extern int mu;
 extern double novel_addition_prob;
 
-extern struct tms start_time;
+extern clock_t start_time;
 
 double get_runtime();
 void start_timing();

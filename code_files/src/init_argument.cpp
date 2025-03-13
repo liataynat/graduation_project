@@ -91,6 +91,7 @@ void init_argument(int argc, char **argv){
     return ;
 }
 
+typedef bool (*ArgHandler)(const char* value, void* field, ...);
 
 typedef struct {
     const char* name;
@@ -187,8 +188,7 @@ bool parse_argument(int argc,char **argv){
         {"-novel_addition_prob", handleDouble, &novel_addition_prob, 0.0, 1.0},
         {"-subset_selection_scheme", handleInt, &flag_subset_selection_scheme, 1, 9},
         {"-SAinitN", handleInt, &SAinitN, 2, 5},
-        {"-SAt", handleInt, &SAt, 1, INT_MAX},
-        {NULL, NULL, NULL, 0, 0}
+        {"-SAt", handleInt, &SAt, 1, INT_MAX}
     };
 
     for (int i = 1; i < argc; i++) {
@@ -416,8 +416,6 @@ bool parse_argument(int argc,char **argv){
 
 
 }//好多啊
-
-typedef bool (*ArgHandler)(const char* value, void* field, ...);
 
 // bool handleString(const char* value, CommandLineArgs* args, char* field, size_t size) {
 //     if (strlen(value) >= size) return false; // 检查长度是否超出
