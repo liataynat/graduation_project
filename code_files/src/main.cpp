@@ -7,6 +7,9 @@
 int main(int argc, char **argv){
     init_argument(argc,argv);
     preprocessing();
-    function_test();
+    init_variables();
+    solution_initialization();
+    cout << "first step!" << endl;
+    //function_test();
     return 0;
 }

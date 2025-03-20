@@ -2,6 +2,7 @@
 #define _PREPROCESS_CPP_
 
 #include "../include/preprocess.h"
+#include "../include/basis.h"
 
 void preprocessing() {
     // cout << "preprocessing\n";

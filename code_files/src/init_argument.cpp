@@ -41,41 +41,35 @@
 //     int SAt;
 // } CommandLineArgs;
 
-char inst_filename[256];
+std::string inst_filename;
 bool flag_inst = false;
 bool flag_auto_select = false;
 bool flag_print_smart_format = false;
 int seed = 0;
 bool flag_seed = false;
-long long max_step = 0;
-int cutoff_time = 0;
 bool flag_time = false;
 bool flag_print_sol = false;
 bool flag_print_step = false;
 bool flag_perform_bms = false;
-int BMS_T = 0;
 int flag_subset_score_calculation = 0;
 int flag_solution_initialization = 0;
 bool flag_perform_cc = false;
 bool flag_perform_iscc = false;
 bool flag_perform_tabu = false;
-int tabu_alpha = 0;
 int flag_reconstruction = 0;
-int reconstruct_swap_T = 0;
-bool reconstruct_with_prob = false;
-double reconstruct_prob = 0.0;
 int flag_subset_removal_scheme = 0;
 int flag_subset_addition = 0;
 int flag_perform_alternate_method = 0;
 int flag_update_item_weight_scheme = 0;
-int SAPS_T = 0;
-double SAPS_R = 0.0;
-double PAWS_P = 0.0;
-int mu = 0;
-double novel_addition_prob = 0.0;
 int flag_subset_selection_scheme = 0;
-int SAinitN = 0;
-int SAt = 0;
+
+// typedef enum {
+//     TYPE_INT,
+//     TYPE_LONG_LONG,
+//     TYPE_DOUBLE,
+//     TYPE_BOOL,
+//     TYPE_STRING
+// } FieldType;
 
 void init_argument(int argc, char **argv){
     init_signal();
@@ -91,104 +85,56 @@ void init_argument(int argc, char **argv){
     return ;
 }
 
-typedef bool (*ArgHandler)(const char* value, void* field, ...);
+typedef bool (*ArgHandler)(const char* value, FieldType fieldtype, void* field, void* min, void* max);
 
 typedef struct {
     const char* name;
     ArgHandler handler;
+    FieldType fieldtype;
     void* field;
-    int min;
-    int max;
+    void* min;
+    void* max;
 } ParamEntry;
 
+double double_min = 0.0;
+double double_max = 1.0;
 bool parse_argument(int argc,char **argv){
     int i;
-    // CommandLineArgs args = {0};
-    // ParamEntry paramTable[] = {
-    //     {"-inst", handleString, &args.inst_filename, 0, sizeof(args.inst_filename)},
-    //     {"-auto", handleBool, &args.flag_auto_select, 0, 0},
-    //     {"-formatted_print", handleBool, &args.flag_print_smart_format, 0, 0},
-    //     {"-seed", handleInt, &args.seed, 0, INT_MAX},
-    //     {"-max_step", handleLongLong, &args.max_step, 1, LLONG_MAX},
-    //     {"-cutoff_time", handleInt, &args.cutoff_time, 1, INT_MAX},
-    //     {"-print_sol", handleBool, &args.flag_print_sol, 0, 0},
-    //     {"-print_step", handleBool, &args.flag_print_step, 0, 0},
-    //     {"-perform_bms", handleBool, &args.flag_perform_bms, 0, 0},
-    //     {"-bms_t", handleInt, &args.BMS_T, 1, INT_MAX},
-    //     {"-subset_score_calculation", handleInt, &args.flag_subset_score_calculation, 0, 2},
-    //     {"-solution_initialization_scheme", handleInt, &args.flag_solution_initialization, 1, 4},
-    //     {"-perform_cc", handleBool, &args.flag_perform_cc, 0, 0},
-    //     {"-perform_iscc", handleBool, &args.flag_perform_iscc, 0, 0},
-    //     {"-perform_tabu", handleBool, &args.flag_perform_tabu, 0, 0},
-    //     {"-tabu_alpha", handleInt, &args.tabu_alpha, 1, INT_MAX},
-    //     {"-reconstruction_scheme", handleInt, &args.flag_reconstruction, 1, 3},
-    //     {"-reconstruct_swap_T", handleInt, &args.reconstruct_swap_T, 2, INT_MAX},
-    //     {"-reconstruction_with_prob", handleBool, &args.reconstruct_with_prob, 0, 0},
-    //     {"-reconstruction_prob", handleDouble, &args.reconstruct_prob, 0.0, 1.0},
-    //     {"-subset_removal_scheme", handleInt, &args.flag_subset_removal_scheme, 1, 2},
-    //     {"-subset_addition_scheme", handleInt, &args.flag_subset_addition, 1, 6},
-    //     {"-perform_alternate_method", handleInt, &args.flag_perform_alternate_method, 1, 4},
-    //     {"-update_item_values_scheme", handleInt, &args.flag_update_item_weight_scheme, 1, 4},
-    //     {"-update_item_values_SAPST", handleInt, &args.SAPS_T, 1, INT_MAX},
-    //     {"-update_item_values_SAPSR", handleDouble, &args.SAPS_R, 0.0, 1.0},
-    //     {"-update_item_values_PAWSP", handleDouble, &args.PAWS_P, 0.0, 1.0},
-    //     {"-united_calculation_mu", handleInt, &args.mu, 2, INT_MAX},
-    //     {"-novel_addition_prob", handleDouble, &args.novel_addition_prob, 0.0, 1.0},
-    //     {"-subset_selection_scheme", handleInt, &args.flag_subset_selection_scheme, 1, 9},
-    //     {"-SAinitN", handleInt, &args.SAinitN, 2, 5},
-    //     {"-SAt", handleInt, &args.SAt, 1, INT_MAX},
-    //     {NULL, NULL, NULL, 0, 0} // 结束标志
-    // };
-    // for (int i = 1; i < argc; i++) {
-    //     bool found = false;
-    //     for (int j = 0; paramTable[j].name != NULL; j++) {
-    //         if (strcmp(argv[i], paramTable[j].name) == 0) {
-    //             if (++i >= argc) return false; // 参数缺失
-    //             if (!paramTable[j].handler(argv[i], &args, paramTable[j].field, paramTable[j].min, paramTable[j].max)) {
-    //                 return false; // 参数解析失败
-    //             }
-    //             found = true;
-    //             break;
-    //         }
-    //     }
-    //     if (!found) {
-    //         fprintf(stderr, "Unknown argument: %s\n", argv[i]);
-    //         return false; // 未知参数
-    //     }
-    // }
+    default_algorithm_settings();
     ParamEntry paramTable[] = {
-        {"-inst", handleString, inst_filename, sizeof(inst_filename)},
-        {"-auto", handleBool, &flag_auto_select},
-        {"-formatted_print", handleBool, &flag_print_smart_format},
-        {"-seed", handleInt, &seed, 0, INT_MAX},
-        {"-max_step", handleLongLong, &max_step, 1},
-        {"-cutoff_time", handleInt, &cutoff_time, 1, INT_MAX},
-        {"-print_sol", handleBool, &flag_print_sol},
-        {"-print_step", handleBool, &flag_print_step},
-        {"-perform_bms", handleBool, &flag_perform_bms},
-        {"-bms_t", handleInt, &BMS_T, 1, INT_MAX},
-        {"-subset_score_calculation", handleInt, &flag_subset_score_calculation, 0, 2},
-        {"-solution_initialization_scheme", handleInt, &flag_solution_initialization, 1, 4},
-        {"-perform_cc", handleBool, &flag_perform_cc},
-        {"-perform_iscc", handleBool, &flag_perform_iscc},
-        {"-perform_tabu", handleBool, &flag_perform_tabu},
-        {"-tabu_alpha", handleInt, &tabu_alpha, 1, INT_MAX},
-        {"-reconstruction_scheme", handleInt, &flag_reconstruction, 1, 3},
-        {"-reconstruct_swap_T", handleInt, &reconstruct_swap_T, 2, INT_MAX},
-        {"-reconstruction_with_prob", handleBool, &reconstruct_with_prob},
-        {"-reconstruction_prob", handleDouble, &reconstruct_prob, 0.0, 1.0},
-        {"-subset_removal_scheme", handleInt, &flag_subset_removal_scheme, 1, 2},
-        {"-subset_addition_scheme", handleInt, &flag_subset_addition, 1, 6},
-        {"-perform_alternate_method", handleInt, &flag_perform_alternate_method, 1, 4},
-        {"-update_item_values_scheme", handleInt, &flag_update_item_weight_scheme, 1, 4},
-        {"-update_item_values_SAPST", handleInt, &SAPS_T, 1, INT_MAX},
-        {"-update_item_values_SAPSR", handleDouble, &SAPS_R, 0.0, 1.0},
-        {"-update_item_values_PAWSP", handleDouble, &PAWS_P, 0.0, 1.0},
-        {"-united_calculation_mu", handleInt, &mu, 2, INT_MAX},
-        {"-novel_addition_prob", handleDouble, &novel_addition_prob, 0.0, 1.0},
-        {"-subset_selection_scheme", handleInt, &flag_subset_selection_scheme, 1, 9},
-        {"-SAinitN", handleInt, &SAinitN, 2, 5},
-        {"-SAt", handleInt, &SAt, 1, INT_MAX}
+        {"-inst", handleString, TYPE_STRING, &inst_filename, (void*)256, 0},
+        {"-auto", handleBool, TYPE_BOOL,&flag_auto_select,0,0},
+        {"-formatted_print", handleBool, TYPE_BOOL, &flag_print_smart_format,0,0},
+        {"-seed", handleInt, TYPE_INT,&seed, 0, (void*)INT_MAX},
+        {"-max_step", handleLongLong, TYPE_LONG_LONG, &max_step, (void*)1, (void*)__LONG_LONG_MAX__},
+        {"-cutoff_time", handleInt, TYPE_INT,&cutoff_time, (void*)1, (void*)INT_MAX},
+        {"-print_sol", handleBool, TYPE_BOOL,&flag_print_sol ,0,0},
+        {"-print_step", handleBool, TYPE_BOOL,&flag_print_step,0,0},
+        {"-perform_bms", handleBool, TYPE_BOOL,&flag_perform_bms,0,0},
+        {"-bms_t", handleInt, TYPE_INT, &BMS_T, (void*)1, (void*)INT_MAX},
+        {"-subset_score_calculation", handleInt, TYPE_INT, &flag_subset_score_calculation, 0, (void*)2},
+        {"-solution_initialization_scheme", handleInt, TYPE_INT, &flag_solution_initialization, (void*)1, (void*)4},
+        {"-perform_cc", handleBool, TYPE_BOOL,&flag_perform_cc,0,0},
+        {"-perform_iscc", handleBool, TYPE_BOOL,&flag_perform_iscc,0,0},
+        {"-perform_tabu", handleBool, TYPE_BOOL,&flag_perform_tabu,0,0},
+        {"-tabu_alpha", handleInt, TYPE_INT, &tabu_alpha, (void*)1, (void*)INT_MAX},
+        {"-reconstruction_scheme", handleInt, TYPE_INT,&flag_reconstruction, (void*)1, (void*)3},
+        {"-reconstruct_swap_T", handleInt, TYPE_INT, &reconstruct_swap_T, (void*)2, (void*)INT_MAX},
+        {"-reconstruction_with_prob", handleBool, TYPE_BOOL, &reconstruct_with_prob,0,0},
+        {"-reconstruction_prob", handleDouble, TYPE_DOUBLE, &reconstruct_prob, &double_min, &double_max},
+        {"-subset_removal_scheme", handleInt, TYPE_INT, &flag_subset_removal_scheme, (void*)1, (void*)2},
+        {"-subset_addition_scheme", handleInt, TYPE_INT, &flag_subset_addition, (void*)1, (void*)6},
+        {"-perform_alternate_method", handleInt, TYPE_INT, &flag_perform_alternate_method, (void*)1, (void*)4},
+        {"-update_item_values_scheme", handleInt, TYPE_INT, &flag_update_item_weight_scheme, (void*)1, (void*)4},
+        {"-update_item_values_SAPST", handleInt, TYPE_INT, &SAPS_T, (void*)1, (void*)INT_MAX},
+        {"-update_item_values_SAPSR", handleDouble, TYPE_DOUBLE, &SAPS_R,  &double_min, &double_max},
+        {"-update_item_values_PAWSP", handleDouble, TYPE_DOUBLE, &PAWS_P,  &double_min, &double_max},
+        {"-united_calculation_mu", handleInt, TYPE_INT, &mu, (void*)2, (void*)INT_MAX},
+        {"-novel_addition_prob", handleDouble, TYPE_DOUBLE, &novel_addition_prob, &double_min, &double_max},
+        {"-subset_selection_scheme", handleInt, TYPE_INT, &flag_subset_selection_scheme, (void*)1, (void*)9},
+        {"-SAinitN", handleInt, TYPE_INT, &SAinitN, (void*)2, (void*)5},
+        {"-SAt", handleInt, TYPE_INT, &SAt, (void*)1, (void*)INT_MAX},
+        {NULL,NULL,TYPE_INT,NULL,NULL,NULL}
     };
 
     for (int i = 1; i < argc; i++) {
@@ -196,12 +142,19 @@ bool parse_argument(int argc,char **argv){
         for (int j = 0; paramTable[j].name != NULL; j++) {
             if (strcmp(argv[i], paramTable[j].name) == 0) {
                 if (i + 1 >= argc) {
-                    fprintf(stderr, "Error: Missing value for parameter '%s'\n", paramTable[j].name);
+                    cout << "argc_num error"  << endl;
                     return false;
                 }
-                if (!paramTable[j].handler(argv[i + 1], paramTable[j].field, paramTable[j].min, paramTable[j].max)) {
-                    fprintf(stderr, "Error: Invalid value for parameter '%s'\n", paramTable[j].name);
+                if (!paramTable[j].handler(argv[i + 1], paramTable[j].fieldtype, paramTable[j].field, paramTable[j].min, paramTable[j].max)) {
+                    cout << "argv_content error" << endl;
                     return false;
+                }
+                if(strcmp(paramTable[j].name,"-inst") == 0){
+                    flag_inst = true;
+                }else if(strcmp(paramTable[j].name,"-seed") == 0){
+                    flag_seed = true;
+                }else if(strcmp(paramTable[j].name,"-cutoff_time") == 0){
+                    flag_time = true;
                 }
                 i++; 
                 found = true;
@@ -210,12 +163,16 @@ bool parse_argument(int argc,char **argv){
         }
         if (!found) {
             // 未知参数
-            fprintf(stderr, "Error: Unknown argument '%s'\n", argv[i]);
+            cout << "unknown argument error" << endl;
             return false;
         }
     }
 
     //copy
+    // cout << flag_auto_select << endl;
+    // cout << flag_inst << endl;
+    cout << flag_subset_score_calculation << endl;
+    cout << init_scores_ptr << endl;
 
     if(flag_auto_select) {
         if(!flag_inst) return false;
@@ -450,15 +407,16 @@ bool parse_argument(int argc,char **argv){
 //     return true;
 // }
 
-bool handleString(const char* value, void* field, size_t size) {
-    char* str = (char*)field;
-    if (strlen(value) >= size) return false;
-    strncpy(str, value, size - 1);
-    str[size - 1] = '\0';
+bool handleString(const char* value, FieldType fieldtype, void* field, void* min, void* max) {
+    std::string* str = (std::string*)field; // 将 void* 转换为 std::string*
+    int* size_ptr = (int*)min;             // 将 void* 转换为 int*
+    int size = *size_ptr;                  // 获取目标字段的大小
+    *str = value; // 使用 std::string 的赋值操作
+    // flag_inst = true;
     return true;
 }
 
-bool handleBool(const char* value, void* field) {
+bool handleBool(const char* value, FieldType fieldtype, void* field, void* min, void* max) {
     bool* b = (bool*)field;
     if (strcmp(value, "0") == 0) {
         *b = false;
@@ -470,20 +428,26 @@ bool handleBool(const char* value, void* field) {
     return true;
 }
 
-bool handleInt(const char* value, void* field, int min, int max) {
+bool handleInt(const char* value, FieldType fieldtype, void* field, void* min, void* max) {
     int* num = (int*)field;
-    if (sscanf(value, "%d", num) != 1 || *num < min || *num > max) return false;
+    int* min_val = (int*)min;
+    int* max_val = (int*)max;
+    if (sscanf(value, "%d", num) != 1 || *num < *min_val || *num > *max_val) return false;
     return true;
 }
 
-bool handleLongLong(const char* value, void* field, long long min) {
+bool handleLongLong(const char* value, FieldType fieldtype, void* field, void* min, void* max) {
     long long* num = (long long*)field;
-    if (sscanf(value, "%lld", num) != 1 || *num < min) return false;
+    long long* min_val = (long long*)min;
+    long long* max_val = (long long*)max;
+    if (sscanf(value, "%lld", num) != 1 || *num < *min_val || *num > *max_val) return false;
     return true;
 }
 
-bool handleDouble(const char* value, void* field, double min, double max) {
+bool handleDouble(const char* value, FieldType fieldtype, void* field, void* min, void* max) {
     double* num = (double*)field;
-    if (sscanf(value, "%lf", num) != 1 || *num < min || *num > max) return false;
+    double* min_val = (double*)min;
+    double* max_val = (double*)max;
+    if (sscanf(value, "%lf", num) != 1 || *num < *min_val || *num > *max_val) return false;
     return true;
 }
